@@ -1,0 +1,90 @@
+name: 🔍 Debug Build Issues
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_level:
+        description: 'Debug level'
+        required: true
+        default: 'basic'
+        type: choice
+        options:
+        - basic
+        - detailed
+        - full
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: 🔍 System info
+      run: |
+        echo "🖥️ System Information:"
+        echo "OS: $(uname -a)"
+        echo "Node: $(node --version)"
+        echo "NPM: $(npm --version)"
+        echo "Git: $(git --version)"
+        
+    - name: 📋 Install dependencies
+      run: |
+        echo "📦 Installing dependencies..."
+        npm ci
+        echo "✅ Dependencies installed"
+        
+    - name: 🔑 Check secrets
+      run: |
+        echo "🔐 Checking secrets..."
+        if [ -n "${{ secrets.REACT_APP_SUPABASE_URL }}" ]; then
+          echo "✅ REACT_APP_SUPABASE_URL is set"
+        else
+          echo "❌ REACT_APP_SUPABASE_URL is NOT set"
+        fi
+        
+        if [ -n "${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}" ]; then
+          echo "✅ REACT_APP_SUPABASE_ANON_KEY is set"
+        else
+          echo "❌ REACT_APP_SUPABASE_ANON_KEY is NOT set"
+        fi
+        
+    - name: 🏗️ Build with debug
+      run: |
+        echo "🏗️ Building with debug info..."
+        npm run build
+        echo "✅ Build completed"
+      env:
+        REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+        REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+        
+    - name: 📊 Build analysis
+      run: |
+        echo "📁 Build directory:"
+        ls -la build/
+        echo "📏 Build size:"
+        du -sh build/
+        echo "📄 Build files:"
+        find build/ -type f -name "*.html" -o -name "*.js" -o -name "*.css" | head -10
+        
+    - name: 🧪 Test build
+      run: |
+        echo "🧪 Testing build..."
+        if [ -f "build/index.html" ]; then
+          echo "✅ index.html exists"
+        else
+          echo "❌ index.html NOT found"
+        fi
+        
+        if [ -d "build/static" ]; then
+          echo "✅ static directory exists"
+        else
+          echo "❌ static directory NOT found"
+        fi
