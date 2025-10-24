@@ -1,0 +1,47 @@
+name: 🧹 Cleanup & Maintenance
+
+on:
+  schedule:
+    # Run every Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: 📋 Install dependencies
+      run: npm ci
+      
+    - name: 🔍 Security audit
+      run: npm audit --audit-level moderate
+      
+    - name: 📊 Dependency check
+      run: |
+        echo "📦 Checking for outdated packages:"
+        npm outdated || echo "✅ All packages up to date"
+        
+    - name: 🏗️ Test build
+      run: npm run build
+      env:
+        REACT_APP_SUPABASE_URL: "https://test.supabase.co"
+        REACT_APP_SUPABASE_ANON_KEY: "test-key"
+        
+    - name: 📈 Build analytics
+      run: |
+        echo "📏 Build size analysis:"
+        du -sh build/
+        echo "📁 Build contents:"
+        find build/ -type f -name "*.js" -exec wc -c {} + | sort -n
+        echo "🎯 Largest files:"
+        find build/ -type f -name "*.js" -exec ls -lh {} + | sort -k5 -hr | head -5
