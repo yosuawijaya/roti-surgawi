@@ -1,0 +1,14 @@
+# Placeholder untuk favicon dan logo
+# Untuk production, ganti dengan file gambar yang sesuai:
+# - favicon.ico (16x16, 32x32, 48x48)
+# - logo192.png (192x192)
+# - logo512.png (512x512)
+
+# Saran desain:
+# - Gunakan simbol roti/hosti dengan warna emas
+# - Font: Playfair Display untuk huruf "R"
+# - Background: transparan atau putih
+# - Style: minimalis dan elegan
+
+
+
